@@ -98,27 +98,3 @@ print(f'{dateAdd}; {username}; {rating}; {title}; {preview}')
 commentsBestPost = Comment.objects.filter(commentPost=postId).values('dateCreation', 'commentUser', 'rating', 'text')   
 print(commentsBestPost)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
