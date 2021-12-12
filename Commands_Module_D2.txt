@@ -1,0 +1,100 @@
+python manage.py shell
+
+from news.models import *
+
+# create users and add in Authors (Dima and Masha)
+user1 = User.objects.create(username='Dima', first_name='Sk')
+Author.objects.create(authorUser=user1)
+user2 = User.objects.create(username='Masha', first_name='Det')
+Author.objects.create(authorUser=user2)
+
+# create 4 categories
+Category.objects.create(name='IT')
+Category.objects.create(name='Crimes')
+Category.objects.create(name='Sport')
+Category.objects.create(name='Games')
+
+
+
+# Create 2 articles and 1 news
+Post.objects.create(author=Author.objects.get(authorUser=User.objects.get(username='Dima')), categoryType='NW', title='nw Title', text='nw text')
+Post.objects.create(author=Author.objects.get(authorUser=User.objects.get(username='Dima')), categoryType='AR', title='sdfsdf Title', text='sdfsdf text')
+Post.objects.create(author=Author.objects.get(authorUser=User.objects.get(username='Masha')), categoryType='AR', title='23234 Title', text='234235 text')
+
+
+# Assign categories
+
+# get posts
+p1 = Post.objects.get(pk=1)
+p2 = Post.objects.get(pk=2)
+p3 = Post.objects.get(pk=3)
+
+# get categories
+c1 = Category.objects.get(name='IT')
+c2 = Category.objects.get(name='Crimes')
+
+# Now let's add links. We take an object that has a connection field
+p1.postCategory.add(c1)
+
+# since the field is ManyToMany, we can add several links
+p2.postCategory.add(c1, c2)  
+  
+p3.postCategory.add(c2)
+
+
+
+# Next, let's add a comment
+# we get the user and indicate to which post the comment
+Comment.objects.create(commentUser=User.objects.get(username='Dima'), commentPost=Post.objects.get(pk=1), text='comment from Dima on post 1')
+Comment.objects.create(commentUser=User.objects.get(username='Masha'), commentPost=Post.objects.get(pk=1), text='comment from Masha on post 1')
+Comment.objects.create(commentUser=User.objects.get(username='Dima'), commentPost=Post.objects.get(pk=2), text='comment from Dima on post 2')
+Comment.objects.create(commentUser=User.objects.get(username='Masha'), commentPost=Post.objects.get(pk=3), text='comment from Masha on post 3')
+Comment.objects.create(commentUser=User.objects.get(username='Dima'), commentPost=Post.objects.get(pk=3), text='comment from Dima on post 3')
+
+
+# Next, let's like, dislike posts and news
+Post.objects.get(pk=1).like()
+Post.objects.get(pk=1).like()
+Post.objects.get(pk=2).like()
+Post.objects.get(pk=3).dislike()
+
+
+# Next, let's like, dislike comments
+Comment.objects.get(pk=1).like()
+Comment.objects.get(pk=1).like()
+Comment.objects.get(pk=1).like()
+Comment.objects.get(pk=2).like()
+Comment.objects.get(pk=2).like()
+Comment.objects.get(pk=3).dislike()
+
+
+
+# Now need to update the user rating
+Author.objects.get(authorUser=User.objects.get(username='Dima')).update_rating()
+Author.objects.get(authorUser=User.objects.get(username='Masha')).update_rating()
+
+
+# display username and rating of the best user
+best = Author.objects.all().order_by('-ratingAuthor').values('authorUser', 'ratingAuthor')[0]
+userId = list(best.values())[0]
+userRat = list(best.values())[1]
+username = User.objects.get(pk=userId)
+print(f'{username}: {userRat}')
+
+
+# Display the date of adding, username of the author, rating, title and preview of the best article
+bestPost = Post.objects.all().order_by('-rating').values('dateCreation', 'author', 'rating', 'title', 'id')[0]
+dateAdd = list(bestPost.values())[0]
+author = list(bestPost.values())[1]
+username = User.objects.get(pk=author)
+rating = list(bestPost.values())[2]
+title = list(bestPost.values())[3]
+preview = Post.objects.get(title=title, author=author).preview()
+postId = list(bestPost.values())[4]
+print(f'{dateAdd}; {username}; {rating}; {title}; {preview}')
+
+
+# And display all comments on this article
+commentsBestPost = Comment.objects.filter(commentPost=postId).values('dateCreation', 'commentUser', 'rating', 'text')   
+print(commentsBestPost)
+
