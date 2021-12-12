@@ -20,7 +20,7 @@ class Author(models.Model):
         #получаем сумму поля rating связанного с автором
         pRat += postRat.get('postRating')
 
-        commentRat = self.authorUser.comment_set.all().aggrigagte(commentRating=Sum('rating'))
+        commentRat = self.authorUser.comment_set.all().aggregate(commentRating=Sum('rating'))
         cRat = 0
         cRat += commentRat.get('commentRating')
 
@@ -47,7 +47,7 @@ class Post(models.Model):
 
     dateCreation = models.DateTimeField(auto_now_add=True)
 
-    # связь один ко многим с моделью Category, through - промежуточная модель PostCategory
+    # связь многие ко многим с моделью Category, through - промежуточная модель PostCategory
     postCategory = models.ManyToManyField(Category, through='PostCategory')
 
     title = models.CharField(max_length=128)
