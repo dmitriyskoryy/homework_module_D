@@ -1,0 +1,9 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %} News {% endblock title %}
+
+{% block content %}
+<h1>{{ newsone.title }}</h1>
+<h3>{{ newsone.dateCreation|date:'d.m.Y' }}. Автор {{ newsone.author.authorUser }}</h3><br>
+{{ newsone.text }}
+{% endblock content %}
