@@ -20,13 +20,11 @@ def censor(value):
     clear_list = []
 
     for word_list_value in list_value:
-        flag = True
         word_lower = word_list_value.lower()
         for unwanted_word in unwanted_words:
             if unwanted_word in word_lower:
                 s = f'{word_list_value[:1]}...{word_list_value[-1]}'
                 word_list_value = s
-                # flag = True
                 break
 
         clear_list.append(word_list_value)

@@ -1,5 +1,4 @@
 
-
 {% extends 'flatpages/default.html' %}
 
 {% load custom_filters %}
@@ -8,7 +7,6 @@
 
 {% block content %}
     <h1>Все новости</h1>
-    <h3>Колличество новостей: {{ news|length }}</h3>
 
 <!--    <h3>{{ value1|default_if_none:"ничего" }}</h3>-->
 
@@ -36,8 +34,7 @@
                     {{ news.dateCreation|date:'d.m.Y' }}
                 </td>
                 <td>
-<!--                    {{ news.text|censor|truncatewords:50 }}-->
-                    {{ news.text|censor }}
+                    {{ news.text|censor|truncatewords:50 }}
                 </td>
             </tr>
         {% endfor %}
