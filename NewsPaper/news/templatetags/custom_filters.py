@@ -17,7 +17,7 @@ unwanted_words = ['бля', 'хуй', 'хуе', 'хуё', 'хуи', 'пизд', 
 def censor(value):
     list_value = value.split()
 
-    clear_list = []
+    clean_list = []
 
     for word_list_value in list_value:
         word_lower = word_list_value.lower()
@@ -27,9 +27,9 @@ def censor(value):
                 word_list_value = s
                 break
 
-        clear_list.append(word_list_value)
+        clean_list.append(word_list_value)
 
-    return ' '.join(clear_list)
+    return ' '.join(clean_list)
 
 
 
