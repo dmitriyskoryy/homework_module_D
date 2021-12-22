@@ -1,48 +1,69 @@
-
 {% extends 'flatpages/default.html' %}
 
+
+<!--Когда необходимо использовать собственные фильмры:-->
 {% load custom_filters %}
 
 {% block title %} News All {% endblock title %}
 
 {% block content %}
     <h1>Все новости</h1>
+    <h2>{{ news|length }}</h2>
 
-<!--    <h3>{{ value1|default_if_none:"ничего" }}</h3>-->
+    <form method="GET">
+        {{ filter.form }} <!-- Форму фильтров сделает Django -->
+        <input type="submit" value="Найти">
+    </form>
 
-    <br>
-    {% if news %}
-        <table>
-            <tr>
-                <td>
-                    Заголовок
-                </td>
-                <td>
-                    Дата публикации
-                </td>
-                <td>
-                    Текст
-                </td>
-            </tr>
-
-        {% for news in news %}
-            <tr>
-                <td>
-                    {{ news.title|censor }}
-                </td>
-                <td>
-                    {{ news.dateCreation|date:'d.m.Y' }}
-                </td>
-                <td>
-                    {{ news.text|censor|truncatewords:50 }}
-                </td>
-            </tr>
+    <table>
+        <thead>
+        <th>
+            Название новости
+        </th>
+        <th>
+            Дата создания
+        </th>
+        <th>
+            Содержание
+        </th>
+    </thead>
+        {% for news_ in filter.qs %} <!-- поменяем products на filter.qs, т.к. теперь мы забираем уже отобранную по каким-то параметрам информацию -->
+        <tr>
+            <td>
+                {{ news_.title|censor }}
+            </td>
+            <td>
+                {{ news_.dateCreation|date:'d.m.Y' }}
+            </td>
+            <td>
+                {{ news_.text|censor|truncatewords:50 }}
+            </td>
+        </tr>
         {% endfor %}
-        </table>
-    {% else %}
-        <h2>Новостей нет!</h2>
+    </table>
+
+        <!-- Проверяем что поддерживается постраничный вывод -->
+{% if is_paginated %}
+    <!-- Если доступна предыдущая страница, то даём ссылку на неё и самую первую страницу -->
+    {% if page_obj.has_previous %}
+        <a href="?page=1">First</a>
+        <a href="?page={{ page_obj.previous_page_number }}"><<<</a>
     {% endif %}
+
+    <!-- Показываем только текущую страницу и ближайшие к ней, чтобы список не тянулся и не захламлял страницу -->
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+            <a>{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    <!-- Если есть следующая страница, то даём ссылку на неё и на самую последнюю страницу -->
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">>>></a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+    {% endif %}
+{% endif %}
 {% endblock content %}
-
-
 
