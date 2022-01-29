@@ -1,0 +1,95 @@
+{% extends 'flatpages/default.html' %}
+
+
+<!--Когда необходимо использовать собственные фильмры:-->
+{% load custom_filters %}
+
+{% block title %} News All {% endblock title %}
+
+
+
+{% block all_news %}
+
+{% for new in newslist %}
+    <div class="article">
+        <div class="left">
+            <div class="article-title">
+                <p>On Feb 25, 2015 <a class="span_link" href="#"><span class="glyphicon glyphicon-comment"></span>0 </a><a class="span_link" href="#"><span class="glyphicon glyphicon-eye-open"></span>104 </a><a class="span_link" href="#"><span class="glyphicon glyphicon-thumbs-up"></span>52</a></p>
+                <a class="title" href="{% url 'news_detail' new.id %}" target="_blank">{{ new.title|censor }}</a>
+            </div>
+            <div class="article-text">
+                <a href="{% url 'news_detail' new.id %}" target="_blank"><p>{{ new.text|censor|truncatewords:50 }}</p></a>
+                <div class="clearfix"></div>
+                <a href="{% url 'news_delete' new.id %}"><u>Удалить новость</u></a>  <!--  добавим ссылку на удаление новости-->
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+{% endfor %}
+
+
+
+<a href="{% url 'news_create' %}"><u>Добавить новость</u></a>  <!--  добавим ссылку на редактирование товара-->
+ <!-- поменяем news на filter.qs, т.к. теперь мы забираем уже отобранную по каким-то параметрам информацию -->
+
+<!--    {{ news_.dateCreation|date:'d.m.Y' }}-->
+
+
+<!-- Проверяем что поддерживается постраничный вывод -->
+{% if is_paginated %}
+    <h3>
+    <!-- Если доступна предыдущая страница, то даём ссылку на неё и самую первую страницу -->
+    {% if page_obj.has_previous %}
+       <a href="?page=1">First</a>
+       <a href="?page={{ page_obj.previous_page_number }}"><<<</a>
+    {% endif %}
+
+    <!-- Показываем только текущую страницу и ближайшие к ней, чтобы список не тянулся и не захламлял страницу -->
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+            <a>{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    <!-- Если есть следующая страница, то даём ссылку на неё и на самую последнюю страницу -->
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">>>></a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+    {% endif %}
+    </h3>
+{% endif %}
+
+
+
+<!--<form method="POST">-->
+<!--    {% csrf_token %}-->
+<!--    {{ form }} &lt;!&ndash; Теперь нам нужна только готовая форма и кнопка &ndash;&gt;-->
+<!--    <input type="submit" value="Добавить новость">-->
+<!--</form>-->
+
+<!--<form method="POST">-->
+<!--    {% csrf_token %}-->
+<!--    <label for="title_">Заголовок</label>-->
+<!--    <input name="title_" type="text">-->
+
+<!--    <label for="text_">Текст</label>-->
+<!--    <input name="text_" type="text">-->
+
+<!--    &lt;!&ndash; Здесь будет список авторов. &ndash;&gt;-->
+<!--    <select-->
+<!--            name="author" size="4"> {% for author in authors %} <option value="{{ author.id }}"> {{ author.authorUser }} </option> {% endfor %}-->
+<!--    </select>-->
+
+<!--&lt;!&ndash; Здесь будет список категорий. &ndash;&gt;-->
+<!--    <select-->
+<!--            name="category" size="4"> {% for category in categories %} <option value="{{ category.id }}"> {{ category.name }} </option> {% endfor %}-->
+<!--    </select>-->
+<!--    <input type="submit" value="Добавить новость">-->
+<!--</form>-->
+
+{% endblock all_news %}
+
+
+{% block news_count %} {{ newslist|length }} {% endblock news_count %}
