@@ -8,13 +8,24 @@ from django.core.paginator import Paginator # импортируем класс,
 #для того чтобы сделать декорированное представление с помощью миксина LoginRequiredMixin,
 # которое будет выполняться если пользователь аутентифицирован на сайте
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
+
+from django.shortcuts import redirect
+from django.contrib.auth.models import Group
+from django.contrib.auth.decorators import login_required
+
+from django.core.mail import send_mail
+# класс для создание объекта письма с html
+from django.core.mail import EmailMultiAlternatives
+#  функция, которая срендерит  html в текст
+from django.template.loader import render_to_string
 
 from datetime import datetime
 
 from .filters import PostFilter #My_AuthorFilter, My_DateFilter # импортируем написанный фильтр
 from .models import *
-from .forms import NewsForm # импортируем  форму
+from .forms import NewsForm
 from django.contrib.auth.models import User
 
 
@@ -32,29 +43,38 @@ class PostList(generic.ListView):
     paginate_by = 6
 
 
-    # метод get_context_data нужен нам для того, чтобы мы могли передать переменные в шаблон.
+    # метод get_context_data нужен  для того, чтобы  передать переменные в шаблон.
     # В возвращаемом словаре context будут храниться все переменные. Ключи этого словаря и есть переменные,
     # к которым мы сможем потом обратиться через шаблон
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['time_now'] = datetime.now()
+        context['is_not_authors'] = not self.request.user.groups.filter(name='authors').exists()
         return context
 
 
 
 
-# дженерик для получения деталей о товаре
+
 class PostDetailView(generic.DetailView):
     template_name = 'news_detail.html'
     context_object_name = 'new'
     queryset = Post.objects.all()
 
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
-# дженерик для создания объекта. Надо указать только имя шаблона и класс формы . Остальное он сделает сам
-class PostCreateView(LoginRequiredMixin, generic.CreateView):
+
+
+
+class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.CreateView):
+    model = Post
     template_name = 'news_create.html'
     form_class = NewsForm
+    permission_required = ('news.add_post',)
+
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -62,21 +82,52 @@ class PostCreateView(LoginRequiredMixin, generic.CreateView):
         return context
 
 
+    # при добавлении новости будет сообщать об этом на почту
+    # получем html
+    html_content = render_to_string(
+        'mail_send.html',
+        {
+            'mynews': '()',
+        }
+    )
+
+    msg = EmailMultiAlternatives(
+        subject=f'Письно при доб новости, {datetime.now()}',
+        body='sdfsdfsdfsdf',
+        from_email='di.sk39@yandex.ru',
+        to=['progdebug39@gmail.com'],
+    )
+    msg.attach_alternative(html_content, "text/html")  # добавляем html
+    # msg.send()  # отсылаем
 
 
 
-# дженерик для редактирования объекта
-class PostUpdateView(LoginRequiredMixin, generic.UpdateView):
+    # send_mail(
+    #     subject=f'Письно при доб новости, {datetime.now("%Y-%M-%d")}',
+    #     message='Текс присьма',
+    #     from_email='di.sk39@yandex.ru',  # почта, с которой отправлять
+    #     recipient_list=['progdebug39@gmail.com', ],
+    # )
+
+
+
+
+class PostUpdateView(LoginRequiredMixin, PermissionRequiredMixin, generic.UpdateView):
+    model = Post
     template_name = 'news_create.html'
     form_class = NewsForm
+    permission_required = ('news.change_post',)
 
-    # метод get_object мы используем вместо queryset, чтобы получить информацию об объекте который мы собираемся редактировать
+
+    # метод get_object  исп вместо queryset, чтобы получить информацию об объекте который нужно редактировать
     def get_object(self, **kwargs):
         id = self.kwargs.get('pk')
         return Post.objects.get(pk=id)
 
 
-# дженерик для удаления
+
+
+
 class PostDeleteView(LoginRequiredMixin, generic.DeleteView):
     template_name = 'news_delete.html'
     queryset = Post.objects.all()
@@ -111,10 +162,18 @@ class PostSearch(generic.ListView):
             "filter": self.get_filter(),
         }
 
-        #context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset()) # вписываем наш фильтр в контекст
-        #return context
 
-#
+
+@login_required
+def upgrade_me(request):
+    user = request.user
+    authors_group = Group.objects.get(name='authors')
+
+    if not request.user.groups.filter(name='authors').exists():
+        authors_group.user_set.add(user)
+    return redirect('/news/')
+
+
 # def user_search(request):
 #     f = My_AuthorFilter(request.GET, queryset=User.objects.all())
 #     return render(request, 'search.html', {'filter': f})

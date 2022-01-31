@@ -12,7 +12,7 @@ urlpatterns = [
     path('news_delete/<int:pk>/', PostDeleteView.as_view(), name='news_delete'),# Ссылка на уладение новости
     path('search/', PostSearch.as_view()),
 
-
+    path('upgrade/', upgrade_me, name = 'upgrade'),
     # path('search/', user_search),
     # path('search/', date_search),
 
