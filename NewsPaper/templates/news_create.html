@@ -8,7 +8,7 @@
 {% if not is_not_authors %}
 <form method="POST">
     {% csrf_token %}
-    {{ form.as_p }} <!-- Теперь нужна только готовая форма и кнопка -->
+    {{ form.as_p }}
     {{ form.as_p.errors }}
 
     <input type="submit" value="Добавить новость">

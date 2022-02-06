@@ -49,12 +49,15 @@ class Post(models.Model):
         (NEWS, 'Новость'),
         (ARTICLE, 'Статья'),
     )
-    categoryType = models.CharField(max_length=2, choices=CATEGORY_CHOICES, default=ARTICLE)
+
+
+    categoryType = models.CharField(max_length=2, choices=CATEGORY_CHOICES, default=NEWS, verbose_name='Раздел')
 
     dateCreation = models.DateTimeField(auto_now_add=True, verbose_name='Дата')
 
     # связь многие ко многим с моделью Category, through - промежуточная модель PostCategory
     postCategory = models.ManyToManyField(Category, through='PostCategory', verbose_name='Категория')
+
 
     title = models.CharField(max_length=128, verbose_name='Заголовок')
     text = models.TextField(verbose_name='Текст статьи')
@@ -112,4 +115,13 @@ class Comment(models.Model):
     def dislike(self):
         self.rating -= 1
         self.save()
+
+
+
+class Subscriber(models.Model):
+    subscribersUser = models.ForeignKey(User, on_delete=models.CASCADE)
+    postCategory = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.subscribersUser} {self.postCategory}'
 

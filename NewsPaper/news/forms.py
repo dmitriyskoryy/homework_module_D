@@ -4,7 +4,7 @@ from .models import *
 
 
 # Создаём модельную форму
-class NewsForm(ModelForm):
+class FormCreateNews(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['author'].empty_label = "Автор не выбран"
@@ -12,7 +12,7 @@ class NewsForm(ModelForm):
     # в класс мета, как обычно, надо написать модель, по которой будет строиться форма и нужные нам поля. Мы уже делали что-то похожее с фильтрами.
     class Meta:
         model = Post
-        fields = ['title', 'text', 'author', 'postCategory',]
+        fields = ['title', 'text', 'author', 'categoryType', 'postCategory',]
 
         # widgets = {
         #     'title': TextInput(attrs={'class': 'form-input'}),

@@ -1,4 +1,6 @@
 #  views.generic позволит выводить все объекты из БД в браузер "в HTML"
+from smtplib import SMTPDataError
+
 from django.shortcuts import render
 
 
@@ -18,6 +20,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 # класс для создание объекта письма с html
 from django.core.mail import EmailMultiAlternatives
+from django.core.mail import mail_admins
+
 #  функция, которая срендерит  html в текст
 from django.template.loader import render_to_string
 
@@ -25,8 +29,30 @@ from datetime import datetime
 
 from .filters import PostFilter #My_AuthorFilter, My_DateFilter # импортируем написанный фильтр
 from .models import *
-from .forms import NewsForm
+from .forms import FormCreateNews
 from django.contrib.auth.models import User
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver # импортируем нужный декоратор
+from django.core.mail import mail_managers
+
+#
+# # в декоратор передаётся первым аргументом сигнал, на который будет реагировать эта функция, и в отправители надо передать также модель
+# @receiver(post_save, sender=Post)
+# def notify_managers_appointment(sender, instance, created, **kwargs):
+#     if created:
+#         subject = f'{instance.title} {instance.dateCreation.strftime("%d %m %Y")}'
+#     else:
+#         subject = f'Post changed for {instance.title} {instance.dateCreation.strftime("%d %m %Y")}'
+#
+#     mail_managers(
+#         subject=subject,
+#         message=instance.title,
+#     )
+
+
+
 
 
 # пишем представление
@@ -63,7 +89,19 @@ class PostDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        idPost = Post.objects.get(pk=self.kwargs.get('pk')).id
+        cat = Post.objects.get(pk=idPost).postCategory
+        # cat = Category.objects.get(name='IT')
+        print(cat, '===============================')
+
+        # context['category'] = Category.objects.get(name=Post.objects.get(pk=8).postCategory)
         return context
+
+
+    # def get_object(self, **kwargs):
+    #     id = self.kwargs.get('pk')
+    #     print(id, '==============================')
+    #     return Post.objects.get(pk=id)
 
 
 
@@ -71,35 +109,47 @@ class PostDetailView(generic.DetailView):
 class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.CreateView):
     model = Post
     template_name = 'news_create.html'
-    form_class = NewsForm
+    form_class = FormCreateNews
     permission_required = ('news.add_post',)
-
 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = NewsForm()
+        context['form'] = FormCreateNews
         return context
 
 
-    # при добавлении новости будет сообщать об этом на почту
-    # получем html
+
+
+
+    # content = Post.objects.all().order_by('-id')[0]
+
     html_content = render_to_string(
         'mail_send.html',
         {
-            'mynews': '()',
+            'news': 'content',
         }
     )
 
-    msg = EmailMultiAlternatives(
-        subject=f'Письно при доб новости, {datetime.now()}',
-        body='sdfsdfsdfsdf',
-        from_email='di.sk39@yandex.ru',
-        to=['progdebug39@gmail.com'],
-    )
-    msg.attach_alternative(html_content, "text/html")  # добавляем html
-    # msg.send()  # отсылаем
 
+    msg = EmailMultiAlternatives(
+        subject=f'Здравствуй. Новая статья в твоём любимом разделе!',
+        body=f'',
+        from_email=f'di.sk39@yandex.ru',
+        to=[f'progdebug39@gmail.com'],
+    )
+    msg.attach_alternative(html_content, "text/html")
+    try:
+        print('msg.send()')
+    except:
+        raise SMTPDataError(554, 'Сообщение отклонено по подозрению в спаме!')
+
+
+    # # отправляем письмо всем админам по аналогии с send_mail, только здесь получателя указывать не надо
+    # mail_admins(
+    #     subject=f'{content.title}, дата: {datetime.now().strftime("%d/%m/%y")}',
+    #     message='content',
+    # )
 
 
     # send_mail(
@@ -112,10 +162,11 @@ class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.Create
 
 
 
+
 class PostUpdateView(LoginRequiredMixin, PermissionRequiredMixin, generic.UpdateView):
     model = Post
     template_name = 'news_create.html'
-    form_class = NewsForm
+    form_class = FormCreateNews
     permission_required = ('news.change_post',)
 
 
@@ -172,6 +223,10 @@ def upgrade_me(request):
     if not request.user.groups.filter(name='authors').exists():
         authors_group.user_set.add(user)
     return redirect('/news/')
+
+
+
+
 
 
 # def user_search(request):

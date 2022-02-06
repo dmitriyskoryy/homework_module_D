@@ -14,9 +14,12 @@
 					<p class="artext">{{ new.text|censor }}</p><br><br>
 
 					<a href="{% url 'news_update' new.id %}"><u>Изменить новость</u></a>  <!--  добавим ссылку на изменение новости-->
-
 					<div class="clearfix"></div>
 
+					<form method="POST">
+    					{% csrf_token %}
+						<input type="submit" value="Подписаться на новости {{ category }}">
+					</form>
 
 				<div class="response">
 					<h4>Responses</h4>

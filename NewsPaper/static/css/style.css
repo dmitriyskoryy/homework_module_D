@@ -51,17 +51,16 @@ label{
     background-color: #000;
     padding: 6px 0 8px 0;
 }
+
 .top-menu {
     padding: 0 15px;
 	float:left;
 }
 
-
 .top-menu ul li {
 	display:inline-block;
     margin-right: 19px;
 }
-
 
 .top-menu ul li a {
     color: #dddddd;
@@ -70,10 +69,15 @@ label{
 	font-weight: 400;
 	text-transform:capitalize;
 }
+
 .top-menu ul li a:hover {
 	color:#fff;
 }
 
+.num {
+    padding: 0 15px;
+	float:right;
+}
 
 .header-bottom {
     padding: 2em 0 0.8em 0;

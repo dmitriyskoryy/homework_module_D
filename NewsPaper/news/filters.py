@@ -32,8 +32,10 @@ class PostFilter(FilterSet):
         #'dateCreation': ['gt'],  # дата создания должна быть больше или равна той, что указал пользователь
         # 'dateCreation': ['lt'],  # дата создания должна быть меньше или равнa той, что указал пользователь
 
-#
-#
+
+
+
+
 # class My_AuthorFilter(FilterSet):
 #     authorUser = CharFilter(method='user_filter')
 #     class Meta:

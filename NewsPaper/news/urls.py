@@ -13,6 +13,9 @@ urlpatterns = [
     path('search/', PostSearch.as_view()),
 
     path('upgrade/', upgrade_me, name = 'upgrade'),
+    # path('subscribe/', Subscribe_me.as_view(), name='subscribe'),
+
+
     # path('search/', user_search),
     # path('search/', date_search),
 

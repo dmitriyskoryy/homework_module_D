@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.flatpages',
 
+
+    # 'news.apps.NewsConfig',
     'news',
     'accounts',
 
@@ -57,9 +59,12 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    # ... include the providers you want to enable:
+
     'allauth.socialaccount.providers.google',
 ]
+
+
+DEFAULT_FROM_EMAIL = 'di.sk39@yandex.ru'
 
 SITE_ID = 1
 
@@ -74,6 +79,8 @@ MIDDLEWARE = [
 
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]
+
+
 
 ROOT_URLCONF = 'NewsPaper.urls'
 
@@ -192,3 +199,10 @@ EMAIL_PORT = 465
 EMAIL_HOST_USER = 'di.sk39'
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_SSL = True # Яндекс использует ssl,
+
+#
+# ADMINS = [
+#     ('admin', 'progdebug39@gmail.com'),
+#     # список всех админов в формате ('имя', 'их почта')
+# ]
+# SERVER_EMAIL = 'di.sk39@yandex.ru'
