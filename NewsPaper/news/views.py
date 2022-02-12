@@ -1,9 +1,4 @@
-#  views.generic позволит выводить все объекты из БД в браузер "в HTML"
-from smtplib import SMTPDataError
-
-from django.shortcuts import render
-
-
+from django.core.exceptions import ObjectDoesNotExist
 from django.views import generic
 from django.core.paginator import Paginator # импортируем класс, позволяющий удобно осуществлять постраничный вывод
 
@@ -17,13 +12,10 @@ from django.shortcuts import redirect
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 
-from django.core.mail import send_mail
-# класс для создание объекта письма с html
-from django.core.mail import EmailMultiAlternatives
-from django.core.mail import mail_admins
 
-#  функция, которая срендерит  html в текст
-from django.template.loader import render_to_string
+
+
+
 
 from datetime import datetime
 
@@ -33,29 +25,10 @@ from .forms import FormCreateNews
 from django.contrib.auth.models import User
 
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver # импортируем нужный декоратор
-from django.core.mail import mail_managers
-
-#
-# # в декоратор передаётся первым аргументом сигнал, на который будет реагировать эта функция, и в отправители надо передать также модель
-# @receiver(post_save, sender=Post)
-# def notify_managers_appointment(sender, instance, created, **kwargs):
-#     if created:
-#         subject = f'{instance.title} {instance.dateCreation.strftime("%d %m %Y")}'
-#     else:
-#         subject = f'Post changed for {instance.title} {instance.dateCreation.strftime("%d %m %Y")}'
-#
-#     mail_managers(
-#         subject=subject,
-#         message=instance.title,
-#     )
-
-
-
 
 
 # пишем представление
+
 class PostList(generic.ListView):
     # указываем модель, объекты которой будем выводить
     model = Post
@@ -74,14 +47,15 @@ class PostList(generic.ListView):
     # к которым мы сможем потом обратиться через шаблон
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['is_not_authors'] = not self.request.user.groups.filter(name='authors').exists()
+        user = self.request.user
+        context['is_not_authors'] = not user.groups.filter(name='authors').exists()
         return context
 
 
 
 
 
-class PostDetailView(generic.DetailView):
+class PostDetailView(LoginRequiredMixin, generic.DetailView):
     template_name = 'news_detail.html'
     context_object_name = 'new'
     queryset = Post.objects.all()
@@ -89,19 +63,20 @@ class PostDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        idPost = Post.objects.get(pk=self.kwargs.get('pk')).id
-        cat = Post.objects.get(pk=idPost).postCategory
-        # cat = Category.objects.get(name='IT')
-        print(cat, '===============================')
+        user = self.request.user
+        id = self.kwargs.get('pk')
+        post = Post.objects.get(pk=id)
 
-        # context['category'] = Category.objects.get(name=Post.objects.get(pk=8).postCategory)
+
+        # получаем все категории на которые уже подписан юзер
+        user_subscriptions = [s.postCategory.name for s in Subscriber.objects.filter(subscribersUser=user)]
+
+        # отбираем категории на которые не подписать юзер
+        categoryes = {s.name for s in post.postCategory.all()}
+        diff_set = categoryes.difference(user_subscriptions)
+        context['diff_set'] = diff_set
         return context
 
-
-    # def get_object(self, **kwargs):
-    #     id = self.kwargs.get('pk')
-    #     print(id, '==============================')
-    #     return Post.objects.get(pk=id)
 
 
 
@@ -122,47 +97,6 @@ class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.Create
 
 
 
-    # content = Post.objects.all().order_by('-id')[0]
-
-    html_content = render_to_string(
-        'mail_send.html',
-        {
-            'news': 'content',
-        }
-    )
-
-
-    msg = EmailMultiAlternatives(
-        subject=f'Здравствуй. Новая статья в твоём любимом разделе!',
-        body=f'',
-        from_email=f'di.sk39@yandex.ru',
-        to=[f'progdebug39@gmail.com'],
-    )
-    msg.attach_alternative(html_content, "text/html")
-    try:
-        print('msg.send()')
-    except:
-        raise SMTPDataError(554, 'Сообщение отклонено по подозрению в спаме!')
-
-
-    # # отправляем письмо всем админам по аналогии с send_mail, только здесь получателя указывать не надо
-    # mail_admins(
-    #     subject=f'{content.title}, дата: {datetime.now().strftime("%d/%m/%y")}',
-    #     message='content',
-    # )
-
-
-    # send_mail(
-    #     subject=f'Письно при доб новости, {datetime.now("%Y-%M-%d")}',
-    #     message='Текс присьма',
-    #     from_email='di.sk39@yandex.ru',  # почта, с которой отправлять
-    #     recipient_list=['progdebug39@gmail.com', ],
-    # )
-
-
-
-
-
 class PostUpdateView(LoginRequiredMixin, PermissionRequiredMixin, generic.UpdateView):
     model = Post
     template_name = 'news_create.html'
@@ -178,7 +112,6 @@ class PostUpdateView(LoginRequiredMixin, PermissionRequiredMixin, generic.Update
 
 
 
-
 class PostDeleteView(LoginRequiredMixin, generic.DeleteView):
     template_name = 'news_delete.html'
     queryset = Post.objects.all()
@@ -188,13 +121,8 @@ class PostDeleteView(LoginRequiredMixin, generic.DeleteView):
 
 # пишем представление
 class PostSearch(generic.ListView):
-    # указываем модель, объекты которой будем выводить
     model = Post
-    # указываем имя шаблона, в котором будет лежать html, в котором будут все инструкции о том,
-    # как именно пользователю должны вывеститсь наши объекты
     template_name = 'search.html'
-    # это имя списка, в котором будут лежать все объекты, его надо указать,
-    # чтобы обратиться к самоу списку объектов через html-шаблон
     context_object_name = 'search'
     ordering = ['-id']
 
@@ -205,8 +133,6 @@ class PostSearch(generic.ListView):
     def get_queryset(self):
         return self.get_filter().qs
 
-    #*args это кортеж, а **kwargs это словарь
-    #**super() это распаковка именованных аргументов
     def get_context_data(self, *args, **kwargs):
         return {
             **super().get_context_data(*args, **kwargs),
@@ -226,6 +152,35 @@ def upgrade_me(request):
 
 
 
+@login_required
+def subscribe_me(request):
+    if request.method == "POST":
+        user = request.user
+        id_news = request.POST['id_news']
+        post = Post.objects.get(pk=id_news)
+
+
+        categoryes = set()
+        # получаем все категории на которые хочет подписаться юзер, и формируем множество
+        for s in post.postCategory.all():
+            if request.POST.get(s.name):
+                categoryes.add(request.POST.get(s.name))
+
+        # categoryes = {s.name for s in post.postCategory.all()}
+
+        if categoryes:
+            #получаем все категории на которые уже подписан юзер, и формируем множество
+            user_subscriptions = {s.postCategory.name for s in Subscriber.objects.filter(subscribersUser=user)}
+            #отбираем категории на которые не подписать юзер
+            diff_set = categoryes.difference(user_subscriptions)
+
+            #добавляем категории для юзера в таблицу Subscriber
+            if diff_set:
+                for cat in diff_set:
+                    Subscriber.objects.create(subscribersUser=User.objects.get(username=user), postCategory=Category.objects.get(name=cat))
+
+
+        return redirect(f'/news/{id_news}')
 
 
 

@@ -50,8 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
 
 
-    # 'news.apps.NewsConfig',
-    'news',
+    'news.apps.NewsConfig',
     'accounts',
 
     'django_filters',
@@ -61,10 +60,12 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
 
     'allauth.socialaccount.providers.google',
+
+    'django_apscheduler'
 ]
 
 
-DEFAULT_FROM_EMAIL = 'di.sk39@yandex.ru'
+
 
 SITE_ID = 1
 
@@ -165,10 +166,14 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+
+
+
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+# ACCOUNT_EMAIL_VERIFICATION = 'mandatory' # с подтверждение по почте
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 
@@ -194,15 +199,23 @@ LOGIN_REDIRECT_URL = '/news/'
 ACCOUNT_LOGOUT_REDIRECT_URL = "/news/"
 
 
-EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'di.sk39'
-EMAIL_HOST_PASSWORD = ''
-EMAIL_USE_SSL = True # Яндекс использует ssl,
 
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'dnetdima'
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_SSL = True
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 #
 # ADMINS = [
 #     ('admin', 'progdebug39@gmail.com'),
 #     # список всех админов в формате ('имя', 'их почта')
 # ]
-# SERVER_EMAIL = 'di.sk39@yandex.ru'
+# SERVER_EMAIL = 'di'
+
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+# если задача не выполняется за 25 секунд, то она автоматически снимается, можете поставить время побольше,
+# но как правило, это сильно бьёт по производительности сервера
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds

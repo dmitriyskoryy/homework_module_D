@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm, CharField, TextInput
+from django.forms import ModelForm, CheckboxSelectMultiple
 from .models import *
 
 
@@ -14,9 +14,10 @@ class FormCreateNews(ModelForm):
         model = Post
         fields = ['title', 'text', 'author', 'categoryType', 'postCategory',]
 
-        # widgets = {
-        #     'title': TextInput(attrs={'class': 'form-input'}),
-        # }
+        widgets = {
+             'postCategory': CheckboxSelectMultiple(),
+        }
+
 
     #пользовательский валидатор
     def clean_title(self):
@@ -25,5 +26,4 @@ class FormCreateNews(ModelForm):
             raise ValidationError('Длина заголовка не более 255 символов!')
 
         return title
-
 

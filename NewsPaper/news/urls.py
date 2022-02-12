@@ -12,8 +12,8 @@ urlpatterns = [
     path('news_delete/<int:pk>/', PostDeleteView.as_view(), name='news_delete'),# Ссылка на уладение новости
     path('search/', PostSearch.as_view()),
 
-    path('upgrade/', upgrade_me, name = 'upgrade'),
-    # path('subscribe/', Subscribe_me.as_view(), name='subscribe'),
+    path('upgrade/', upgrade_me, name='upgrade'),
+    path('subscribe/', subscribe_me, name='subscribe'),
 
 
     # path('search/', user_search),

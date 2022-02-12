@@ -16,10 +16,20 @@
 					<a href="{% url 'news_update' new.id %}"><u>Изменить новость</u></a>  <!--  добавим ссылку на изменение новости-->
 					<div class="clearfix"></div>
 
-					<form method="POST">
+
+					<br>
+					{% if diff_set %}
+					<form action="/news/subscribe/" method="POST">
     					{% csrf_token %}
-						<input type="submit" value="Подписаться на новости {{ category }}">
+						<label>Категории:</label><br>
+						{% for cat in diff_set %}
+							<label><input type="checkbox" name={{ cat }} value={{ cat }}> {{ cat }} </label><br>
+						{% endfor %}
+						<input type="hidden" name="id_news" value={{ new.id }}>
+						<button>Подписаться</button>
 					</form>
+					{% endif %}
+					<br>
 
 				<div class="response">
 					<h4>Responses</h4>
