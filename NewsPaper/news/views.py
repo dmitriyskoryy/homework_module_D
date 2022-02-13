@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 
 
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .filters import PostFilter #My_AuthorFilter, My_DateFilter # импортируем написанный фильтр
 from .models import *
@@ -49,6 +49,21 @@ class PostList(generic.ListView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         context['is_not_authors'] = not user.groups.filter(name='authors').exists()
+
+        datestart = datetime.now() - timedelta(days=1)
+        # получаем все новости за определенный период
+        number_news = 0
+        try:
+            post = Post.objects.filter(dateCreation__range=[datestart, datetime.now()],
+                                       author=Author.objects.get(authorUser=user))
+            if post:
+                number_news = len(post)
+            else:
+                number_news = 0
+        except:
+            print('Ошибка!')
+
+        context['limit_news_author'] = number_news
         return context
 
 
@@ -148,6 +163,7 @@ def upgrade_me(request):
 
     if not request.user.groups.filter(name='authors').exists():
         authors_group.user_set.add(user)
+        Author.objects.create(authorUser=User.objects.get(username=user))
     return redirect('/news/')
 
 
