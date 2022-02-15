@@ -34,7 +34,7 @@
     <button><a href="/news/upgrade/">Стать автором</a> </button>
     <br>
 {% elif not is_not_authors %}
-    {% if limit_news_author <= 3 %}
+    {% if limit_news_author < 3 %}
         <a href="{% url 'news_create' %}"><u>Добавить новость</u></a><br>
         <br>
     {% endif %}

@@ -12,9 +12,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 
-
-
-
+from django.core.cache import cache
 
 
 from datetime import datetime, timedelta
@@ -76,6 +74,17 @@ class PostDetailView(LoginRequiredMixin, generic.DetailView):
     queryset = Post.objects.all()
 
 
+    # def get_object(self, *args, **kwargs):  # переопределяем метод получения объекта,
+    #     obj = cache.get(f'post-{self.kwargs["pk"]}', None)  # кэш очень похож на словарь, и метод get действует также. Он забирает значение по ключу, если его нет, то забирает None.
+    #
+    #     # если объекта нет в кэше, то получаем его и записываем в кэш
+    #     if not obj:
+    #         obj = super().get_object(queryset=kwargs['queryset'])
+    #         cache.set(f'post-{self.kwargs["pk"]}', obj)
+    #
+    #     return obj
+
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
@@ -85,12 +94,13 @@ class PostDetailView(LoginRequiredMixin, generic.DetailView):
 
         # получаем все категории на которые уже подписан юзер
         user_subscriptions = [s.postCategory.name for s in Subscriber.objects.filter(subscribersUser=user)]
-
         # отбираем категории на которые не подписать юзер
         categoryes = {s.name for s in post.postCategory.all()}
         diff_set = categoryes.difference(user_subscriptions)
         context['diff_set'] = diff_set
         return context
+
+
 
 
 
@@ -109,7 +119,10 @@ class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.Create
         return context
 
 
-
+    def form_valid(self, FormCreateNews):
+        self.object = FormCreateNews.save(commit=False)
+        self.object.author = Author.objects.get(authorUser=self.request.user)
+        return super().form_valid(FormCreateNews)
 
 
 class PostUpdateView(LoginRequiredMixin, PermissionRequiredMixin, generic.UpdateView):
@@ -168,6 +181,9 @@ def upgrade_me(request):
 
 
 
+# @cache_page(60 * 15)
+# в аргументы к декоратору передаём количество секунд, которые хотим,
+
 @login_required
 def subscribe_me(request):
     if request.method == "POST":
@@ -187,7 +203,7 @@ def subscribe_me(request):
         if categoryes:
             #получаем все категории на которые уже подписан юзер, и формируем множество
             user_subscriptions = {s.postCategory.name for s in Subscriber.objects.filter(subscribersUser=user)}
-            #отбираем категории на которые не подписать юзер
+            #отбираем категории на которые не подписан юзер
             diff_set = categoryes.difference(user_subscriptions)
 
             #добавляем категории для юзера в таблицу Subscriber

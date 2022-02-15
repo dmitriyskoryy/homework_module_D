@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 from django.db.models import Sum
 
+from django.core.cache import cache
 
 class Author(models.Model):
     #Взять один ко дному Автора и Юзера
@@ -82,6 +83,9 @@ class Post(models.Model):
     def get_absolute_url(self):  # добавим абсолютный путь, чтобы после создания нас перебрасывало на страницу с товаром
         return f'/news/{self.id}'
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # сначала вызываем метод родителя, чтобы объект сохранился
+        cache.delete(f'product-{self.pk}')  # затем удаляем его из кэша, чтобы сбросить его
 
 
     # промежуточная модель

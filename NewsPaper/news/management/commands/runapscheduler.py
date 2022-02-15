@@ -57,8 +57,8 @@ def my_job():
                 msg.attach_alternative(html_content, "text/html")
 
                 try:
-                    #msg.send()
-                    print('send')
+                    msg.send()
+                    #print('send')
                 except:
                     raise SMTPDataError(554, 'Сообщение отклонено по подозрению в спаме!')
 

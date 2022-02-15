@@ -21,6 +21,7 @@ def notify_users_news(sender, instance, action, **kwargs):
         post = Post.objects.get(pk=instance.id)
         categoryes = [s.name for s in post.postCategory.all()]
 
+        #по каждой категории получаем подписчиков и шлем им письмо
         if categoryes:
             for cat in categoryes:
                 list_email_subscriptions = [d.subscribersUser.email for d in Subscriber.objects.filter(postCategory=Category.objects.get(name=cat))]
@@ -45,17 +46,28 @@ def notify_users_news(sender, instance, action, **kwargs):
                     msg.attach_alternative(html_content, "text/html")
 
                     try:
-                        print('send')
-                        #msg.send()
+                        #print('send')
+                        msg.send()
                     except:
                         raise SMTPDataError(554, 'Сообщение отклонено по подозрению в спаме!')
 
-        # send_mail(
-        #     subject=f'Здравствуй. Новая статья в твоём любимом разделе!',
-        #     message='Текс присьма',
-        #     from_email='dnetdima@gmail.com',
-        #     recipient_list=list_email_subscriptions,
-        # )
+
+
+
+#сигнал при регистрации на портале
+@receiver(user_signed_up, dispatch_uid="some.unique.string.id.for.allauth.user_signed_up")
+def user_signed_up_(request, user, **kwargs):
+    send_mail(
+        subject=f'Регистрация на портале NewsPortal.',
+        message=f'Добро пожаловать {user}. Ваша регистрация на NewsPortal прошла успешно!',
+        from_email='dnetdima@gmail.com',
+        recipient_list=[user.email],
+    )
+
+
+
+
+
 
 
    # # отправляем письмо всем админам по аналогии с send_mail, только здесь получателя указывать не надо
@@ -63,6 +75,14 @@ def notify_users_news(sender, instance, action, **kwargs):
     #     subject=f'{content.title}, дата: {datetime.now().strftime("%d/%m/%y")}',
     #     message='content',
     # )
+
+
+  # send_mail(
+        #     subject=f'Здравствуй. Новая статья в твоём любимом разделе!',
+        #     message='Текс присьма',
+        #     from_email='dnetdima@gmail.com',
+        #     recipient_list=list_email_subscriptions,
+        # )
 
 
 # @receiver(post_save, sender=Post)
@@ -77,13 +97,3 @@ def notify_users_news(sender, instance, action, **kwargs):
 
 
 
-
-#сигнал при регистрации на портале
-@receiver(user_signed_up, dispatch_uid="some.unique.string.id.for.allauth.user_signed_up")
-def user_signed_up_(request, user, **kwargs):
-    send_mail(
-        subject=f'Регистрация на портале NewsPortal.',
-        message=f'Добро пожаловать {user}. Ваша регистрация на NewsPortal прошла успешно!',
-        from_email='dnetdima@gmail.com',
-        recipient_list=[user.email],
-    )

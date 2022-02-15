@@ -5,9 +5,11 @@ from .models import *
 
 # Создаём модельную форму
 class FormCreateNews(ModelForm):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # self.fields['author'].empty_label = "Автор не выбран"
+
 
     # в класс мета, как обычно, надо написать модель, по которой будет строиться форма и нужные нам поля. Мы уже делали что-то похожее с фильтрами.
     class Meta:
