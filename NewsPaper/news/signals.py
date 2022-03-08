@@ -46,8 +46,8 @@ def notify_users_news(sender, instance, action, **kwargs):
                     msg.attach_alternative(html_content, "text/html")
 
                     try:
-                        #print('send')
-                        msg.send()
+                        print('send')
+                        #msg.send()
                     except:
                         raise SMTPDataError(554, 'Сообщение отклонено по подозрению в спаме!')
 

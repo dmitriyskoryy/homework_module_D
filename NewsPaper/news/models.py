@@ -12,6 +12,8 @@ class Author(models.Model):
     authorUser = models.OneToOneField(User, on_delete=models.CASCADE)
     ratingAuthor = models.SmallIntegerField(default=0)
 
+
+
     def __str__(self):
         return f'{self.authorUser.username}'
 
@@ -40,17 +42,18 @@ class Category(models.Model):
         return f'{self.name}'
 
 
+
 class Post(models.Model):
     #связь один ко многим с моделью Author
     author = models.ForeignKey(Author, on_delete=models.CASCADE, verbose_name='Автор')
 
     NEWS = 'NW'
     ARTICLE = 'AR'
+
     CATEGORY_CHOICES = (
         (NEWS, 'Новость'),
         (ARTICLE, 'Статья'),
     )
-
 
     categoryType = models.CharField(max_length=2, choices=CATEGORY_CHOICES, default=NEWS, verbose_name='Раздел')
 
@@ -85,7 +88,9 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # сначала вызываем метод родителя, чтобы объект сохранился
-        cache.delete(f'product-{self.pk}')  # затем удаляем его из кэша, чтобы сбросить его
+        cache.delete(f'post-{self.pk}')  # затем удаляем его из кэша, чтобы сбросить его
+
+
 
 
     # промежуточная модель

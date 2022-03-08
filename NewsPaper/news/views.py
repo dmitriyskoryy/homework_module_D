@@ -1,6 +1,5 @@
-from django.core.exceptions import ObjectDoesNotExist
+
 from django.views import generic
-from django.core.paginator import Paginator # импортируем класс, позволяющий удобно осуществлять постраничный вывод
 
 #для того чтобы сделать декорированное представление с помощью миксина LoginRequiredMixin,
 # которое будет выполняться если пользователь аутентифицирован на сайте
@@ -12,8 +11,6 @@ from django.shortcuts import redirect
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 
-from django.core.cache import cache
-
 
 from datetime import datetime, timedelta
 
@@ -24,10 +21,10 @@ from django.contrib.auth.models import User
 
 
 
-
 # пишем представление
 
 class PostList(generic.ListView):
+
     # указываем модель, объекты которой будем выводить
     model = Post
     # указываем имя шаблона, в котором будет лежать html, в котором будут все инструкции о том,
@@ -74,15 +71,14 @@ class PostDetailView(LoginRequiredMixin, generic.DetailView):
     queryset = Post.objects.all()
 
 
-    # def get_object(self, *args, **kwargs):  # переопределяем метод получения объекта,
-    #     obj = cache.get(f'post-{self.kwargs["pk"]}', None)  # кэш очень похож на словарь, и метод get действует также. Он забирает значение по ключу, если его нет, то забирает None.
-    #
-    #     # если объекта нет в кэше, то получаем его и записываем в кэш
-    #     if not obj:
-    #         obj = super().get_object(queryset=kwargs['queryset'])
-    #         cache.set(f'post-{self.kwargs["pk"]}', obj)
-    #
-    #     return obj
+    def get_object(self, *args, **kwargs):  # переопределяем метод получения объекта,
+        obj = cache.get(f'post-{self.kwargs["pk"]}', None)  # кэш очень похож на словарь, и метод get действует также. Он забирает значение по ключу, если его нет, то забирает None.
+        # если объекта нет в кэше, то получаем его и записываем в кэш
+        if not obj:
+            obj = super().get_object(queryset=self.queryset)
+            cache.set(f'post-{self.kwargs["pk"]}', obj)
+            print(f'{self.kwargs["pk"]} сработал кэш  ====================================')
+        return obj
 
 
     def get_context_data(self, **kwargs):
