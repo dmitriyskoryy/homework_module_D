@@ -23,9 +23,9 @@
     					{% csrf_token %}
 						<label>Категории:</label><br>
 						{% for cat in diff_set %}
-							<label><input type="checkbox" name={{ cat }} value={{ cat }}> {{ cat }} </label><br>
+							<label><input type="checkbox" name={{cat}} value={{cat}}> {{ cat }} </label><br>
 						{% endfor %}
-						<input type="hidden" name="id_news" value={{ new.id }}>
+						<input type="hidden" name="id_news" value={{new.id}}>
 						<button>Подписаться</button>
 					</form>
 					{% endif %}

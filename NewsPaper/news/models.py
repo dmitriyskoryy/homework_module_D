@@ -13,7 +13,6 @@ class Author(models.Model):
     ratingAuthor = models.SmallIntegerField(default=0)
 
 
-
     def __str__(self):
         return f'{self.authorUser.username}'
 
@@ -45,26 +44,26 @@ class Category(models.Model):
 
 class Post(models.Model):
     #связь один ко многим с моделью Author
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, verbose_name='Автор')
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, verbose_name='Author')
 
     NEWS = 'NW'
     ARTICLE = 'AR'
 
     CATEGORY_CHOICES = (
-        (NEWS, 'Новость'),
-        (ARTICLE, 'Статья'),
+        (NEWS, 'News'),
+        (ARTICLE, 'Article'),
     )
 
-    categoryType = models.CharField(max_length=2, choices=CATEGORY_CHOICES, default=NEWS, verbose_name='Раздел')
+    categoryType = models.CharField(max_length=2, choices=CATEGORY_CHOICES, default=NEWS, verbose_name='TypeNews')
 
-    dateCreation = models.DateTimeField(auto_now_add=True, verbose_name='Дата')
+    dateCreation = models.DateTimeField(auto_now_add=True, verbose_name='Date')
 
     # связь многие ко многим с моделью Category, through - промежуточная модель PostCategory
-    postCategory = models.ManyToManyField(Category, through='PostCategory', verbose_name='Категория')
+    postCategory = models.ManyToManyField(Category, through='PostCategory', verbose_name='Category')
 
 
-    title = models.CharField(max_length=128, verbose_name='Заголовок')
-    text = models.TextField(verbose_name='Текст статьи')
+    title = models.CharField(max_length=128, verbose_name='Caption')
+    text = models.TextField(verbose_name='Text post')
     rating = models.SmallIntegerField(default=0)
 
     def __str__(self):
@@ -83,7 +82,7 @@ class Post(models.Model):
 
     #добавим ссылку на текущий объект. Для того, чтобы при создании объекта или переходе
     #к его деталям не прописывать в каждом дженерике succes_url.
-    def get_absolute_url(self):  # добавим абсолютный путь, чтобы после создания нас перебрасывало на страницу с товаром
+    def get_absolute_url(self):  # добавим абсолютный путь, чтобы после создания нас перебрасывало на страницу с новостю
         return f'/news/{self.id}'
 
     def save(self, *args, **kwargs):

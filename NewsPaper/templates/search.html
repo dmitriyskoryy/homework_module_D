@@ -10,8 +10,8 @@
 <body>
 
 
-
-<!-- Перед таблицей добавим форму для поиска -->
+{% comment "Comment" %}
+<!-- Перед таблицей добавим форму для поиска-->
 <!--<form method="GET">-->
 <!--    {{ filter.form }} &lt;!&ndash; Форму от фильтров сделает Django. кнопку делаем сами &ndash;&gt;-->
 <!--    <input type="submit" value="Найти 1">-->
@@ -38,9 +38,11 @@
 <!--    </tr>-->
 <!--    {% endfor %}-->
 <!--</table>-->
+{% endcomment %}
+
 
 <form method="GET">
-<!--    {{ filter.form.as_p }}-->
+    {% csrf_token %}
     {{ filter.form.as_p }}
     <input type="submit" value="Найти">
 </form>

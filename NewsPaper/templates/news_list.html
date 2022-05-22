@@ -25,6 +25,8 @@
         </div>
         <div class="clearfix"></div>
     </div>
+{% empty %}
+    <h3>Новостей нет</h3>
 {% endfor %}
 
 
@@ -67,7 +69,7 @@
 {% endif %}
 
 
-
+{% comment "Comment" %}
 <!--<form method="POST">-->
 <!--    {% csrf_token %}-->
 <!--    {{ form }} &lt;!&ndash; Теперь нам нужна только готовая форма и кнопка &ndash;&gt;-->
@@ -93,6 +95,7 @@
 <!--    </select>-->
 <!--    <input type="submit" value="Добавить новость">-->
 <!--</form>-->
+{% endcomment %}
 
 {% endblock all_news %}
 

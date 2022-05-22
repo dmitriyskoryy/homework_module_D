@@ -212,6 +212,10 @@ def subscribe_me(request):
 
 
 
+
+
+
+
 # def user_search(request):
 #     f = My_AuthorFilter(request.GET, queryset=User.objects.all())
 #     return render(request, 'search.html', {'filter': f})

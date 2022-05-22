@@ -33,6 +33,9 @@ SECRET_KEY = 'django-insecure-j)@4%tj$3wn!ip#p1pp$6l)u+4qp8=cirj%65*0=xms*mofa^j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
+
+
 ALLOWED_HOSTS = []
 
 
@@ -79,6 +82,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+
+    # 'news.mymiddleware.MobileOrFullMiddleware',
 
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 
@@ -160,7 +166,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'ru-ru'
+LANGUAGE_CODE = 'en-en'
 
 TIME_ZONE = 'UTC'
 
@@ -188,7 +194,6 @@ ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 
-# LOGIN_URL = '/news/news_create/'
 
 
 # Default primary key field type
@@ -196,7 +201,9 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ACCOUNT_FORMS = {'signup': 'accounts.models.BasicSignupForm'}
+ACCOUNT_FORMS = {'signup': 'accounts.models.BasicSignupForm',
+
+                 }
 
 #нужен для пренаправления если пользователь не авторизован
 # важный момент, в пути первый слешь говорит о том что путь пойдет от приложения
@@ -213,7 +220,7 @@ ACCOUNT_LOGOUT_REDIRECT_URL = "/news/"
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'dnetdima'
+EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_SSL = True
 
@@ -230,3 +237,16 @@ APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 # если задача не выполняется за 25 секунд, то она автоматически снимается, можете поставить время побольше,
 # но как правило, это сильно бьёт по производительности сервера
 APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
+
+
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'my_p_db',
+#         'USER': 'postgres',
+#         'PASSWORD': '',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     },
+# }
